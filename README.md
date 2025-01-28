@@ -44,6 +44,7 @@ The build output will be located in the `build` directory.
 - React
 - TypeScript
 - Node.js
+- useReducer
 
 ## Author
 This project was created by [Carmelo Mayén](https://github.com/mayen5).

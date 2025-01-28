@@ -1,18 +1,22 @@
-import { CartItem, Guitar } from '../types/types';
+import { Dispatch, useMemo } from 'react';
+import { CartItem } from '../types/types';
+import { CartActions } from '../reducers/cart-reducer';
 
 type HeaderProps = {
   cart: CartItem[];
-  removeFromCart: (id: Guitar[ 'id' ]) => void;
-  increaseQuantity: (id: Guitar[ 'id' ]) => void;
-  decreaseQuantity: (id: Guitar[ 'id' ]) => void;
-  clearCart: () => void;
-  isEmptyCart: boolean;
-  totalCart: number;
-  MAX_ITEMS: number;
-  MIN_ITEMS: number;
+  dispatch: Dispatch<CartActions>;
 }
 
-export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantity, clearCart, isEmptyCart, totalCart, MAX_ITEMS, MIN_ITEMS }: HeaderProps) => {
+const MAX_ITEMS = 5
+const MIN_ITEMS = 1
+
+export const Header = ({ cart, dispatch }: HeaderProps) => {
+
+  const isEmptyCart = useMemo(() => cart.length === 0, [ cart ])
+
+  const totalCart = useMemo(() => {
+    return cart.reduce((acc, item) => (acc += item?.price * item.quantity), 0)
+  }, [ cart ])
 
   return (
     <header className="py-5 header">
@@ -25,23 +29,23 @@ export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantit
           </div>
           <nav className="col-md-6 a mt-5 d-flex align-items-start justify-content-end">
             <div
-              className="carrito"
+              className="cart"
             >
-              <img className="img-fluid" src="/img/carrito.png" alt="imagen carrito" />
+              <img className="img-fluid" src="/img/cart.png" alt="imagen carrito" />
 
-              <div id="carrito" className="bg-white p-3">
+              <div id="cart" className="bg-white p-3">
                 {
                   isEmptyCart
-                    ? <p className="text-center">El carrito esta vacio</p>
+                    ? <p className="text-center">The cart is empty</p>
                     :
                     <>
                       <table className="w-100 table">
                         <thead>
                           <tr>
-                            <th>Imagen</th>
-                            <th>Nombre</th>
-                            <th>Precio</th>
-                            <th>Cantidad</th>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
                             <th></th>
                           </tr>
                         </thead>
@@ -49,7 +53,7 @@ export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantit
                           {cart?.map((item) => (
                             <tr key={item.id}>
                               <td>
-                                <img className="img-fluid" src={`/img/${item.image}.jpg`} alt="imagen guitarra" />
+                                <img className="img-fluid" src={`/img/${item.image}.jpg`} alt="guitar image" />
                               </td>
                               <td>{item.name}</td>
                               <td className="fw-bold">
@@ -59,7 +63,7 @@ export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantit
                                 <button
                                   type="button"
                                   className="btn btn-dark"
-                                  onClick={() => decreaseQuantity(item.id)}
+                                  onClick={() => dispatch({ type: 'decrease-quantity', payload: { id: item.id } })}
                                   disabled={item.quantity <= MIN_ITEMS}
                                 >
                                   -
@@ -68,7 +72,7 @@ export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantit
                                 <button
                                   type="button"
                                   className="btn btn-dark"
-                                  onClick={() => increaseQuantity(item.id)}
+                                  onClick={() => dispatch({ type: 'increase-quantity', payload: { id: item.id } })}
                                   disabled={item.quantity >= MAX_ITEMS}
                                 >
                                   +
@@ -78,7 +82,7 @@ export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantit
                                 <button
                                   className="btn btn-danger"
                                   type="button"
-                                  onClick={() => removeFromCart(item.id)}
+                                  onClick={() => dispatch({ type: 'remove-from-cart', payload: { id: item.id } })}
                                 >
                                   X
                                 </button>
@@ -87,8 +91,8 @@ export const Header = ({ cart, removeFromCart, increaseQuantity, decreaseQuantit
                           ))}
                         </tbody>
                       </table>
-                      <p className="text-end">Total pagar: <span className="fw-bold">${totalCart}</span></p>
-                      <button className="btn btn-dark w-100 mt-3 p-2" onClick={() => clearCart()}>Vaciar Carrito</button>
+                      <p className="text-end">Total to pay: <span className="fw-bold">${totalCart}</span></p>
+                      <button className="btn btn-dark w-100 mt-3 p-2" onClick={() => dispatch({ type: 'clear-cart' })}>Empty Cart</button>
                     </>
                 }
               </div>
